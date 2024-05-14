@@ -1,0 +1,12 @@
+package: cdn77
+generate:
+    client: true
+    models: true
+output-options:
+    nullable-type: true
+    include-tags:
+        - CDN Resources
+        - Origin
+        - SSL
+        - Object Storage
+output: client.gen.go
