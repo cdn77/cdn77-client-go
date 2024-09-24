@@ -3,6 +3,8 @@ generate:
     client: true
     models: true
 output-options:
+    user-templates:
+        client-with-responses.tmpl: ./client-with-responses.tmpl
     nullable-type: true
     include-tags:
         - CDN Resources
