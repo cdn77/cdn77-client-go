@@ -1,4 +1,4 @@
-module github.com/cdn77/cdn77-client-go
+module github.com/cdn77/cdn77-client-go/v2
 
 go 1.22
 
