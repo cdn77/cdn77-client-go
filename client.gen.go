@@ -144,7 +144,6 @@ const (
 const (
 	InstantSsl SslType = "instantSsl"
 	None       SslType = "none"
-	SAN        SslType = "SAN"
 	SNI        SslType = "SNI"
 )
 
