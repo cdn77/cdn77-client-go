@@ -17,11 +17,16 @@ import (
 
 	"github.com/oapi-codegen/nullable"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+)
+
+// Defines values for LocationType.
+const (
+	LocationTypeCache LocationType = "cache"
+	LocationTypeFull  LocationType = "full"
 )
 
 // Defines values for AccessProtectionType.
@@ -72,6 +77,12 @@ const (
 	SA ContinentCode = "SA"
 )
 
+// Defines values for DiskType.
+const (
+	DiskTypeN0 DiskType = 0
+	DiskTypeN1 DiskType = 1
+)
+
 // Defines values for HttpsRedirectCode.
 const (
 	N301 HttpsRedirectCode = 301
@@ -80,24 +91,24 @@ const (
 
 // Defines values for MaxAge.
 const (
-	MaxAgeN10    MaxAge = 10
-	MaxAgeN10800 MaxAge = 10800
-	MaxAgeN11520 MaxAge = 11520
-	MaxAgeN12960 MaxAge = 12960
-	MaxAgeN1440  MaxAge = 1440
-	MaxAgeN14400 MaxAge = 14400
-	MaxAgeN15840 MaxAge = 15840
-	MaxAgeN17280 MaxAge = 17280
-	MaxAgeN2160  MaxAge = 2160
-	MaxAgeN240   MaxAge = 240
-	MaxAgeN2880  MaxAge = 2880
-	MaxAgeN30    MaxAge = 30
-	MaxAgeN4320  MaxAge = 4320
-	MaxAgeN5760  MaxAge = 5760
-	MaxAgeN60    MaxAge = 60
-	MaxAgeN720   MaxAge = 720
-	MaxAgeN7200  MaxAge = 7200
-	MaxAgeN8640  MaxAge = 8640
+	N10    MaxAge = 10
+	N10800 MaxAge = 10800
+	N11520 MaxAge = 11520
+	N12960 MaxAge = 12960
+	N1440  MaxAge = 1440
+	N14400 MaxAge = 14400
+	N15840 MaxAge = 15840
+	N17280 MaxAge = 17280
+	N2160  MaxAge = 2160
+	N240   MaxAge = 240
+	N2880  MaxAge = 2880
+	N30    MaxAge = 30
+	N4320  MaxAge = 4320
+	N5760  MaxAge = 5760
+	N60    MaxAge = 60
+	N720   MaxAge = 720
+	N7200  MaxAge = 7200
+	N8640  MaxAge = 8640
 )
 
 // Defines values for MaxAge404.
@@ -109,14 +120,6 @@ const (
 	MaxAge404N3600 MaxAge404 = 3600
 	MaxAge404N5    MaxAge404 = 5
 	MaxAge404N60   MaxAge404 = 60
-)
-
-// Defines values for ObjectStorageStatsType.
-const (
-	ObjectCount ObjectStorageStatsType = "object-count"
-	Requests    ObjectStorageStatsType = "requests"
-	Traffic     ObjectStorageStatsType = "traffic"
-	UsedSpace   ObjectStorageStatsType = "used-space"
 )
 
 // Defines values for OriginScheme.
@@ -144,9 +147,11 @@ const (
 const (
 	InstantSsl SslType = "instantSsl"
 	None       SslType = "none"
-	SAN        SslType = "SAN"
 	SNI        SslType = "SNI"
 )
+
+// LocationType Data center location type: "full" for Super PoPs, "cache" for Embedded PoPs.
+type LocationType string
 
 // AccessProtectionType With "type": "blocklist" all values set are not allowed. With "type": "passlist" only values set are allowed.
 type AccessProtectionType string
@@ -209,9 +214,6 @@ type Cdn struct {
 	// OriginId ID of attached Origin (content source for CDN Resource). More information in our <a href="/support/api-docs/v3/origin">Origin</a> API documentation.
 	OriginId nullable.Nullable[string] `json:"origin_id,omitempty"`
 
-	// OriginProtection Enabled origin protection can ease the load on your server or even hide it from direct incoming traffic with our proxy servers.
-	OriginProtection *OriginProtection `json:"origin_protection,omitempty"`
-
 	// QueryString Enabling this feature will ignore the query string, allowing URLs with <a href="https://en.wikipedia.org/wiki/Query_string">query strings</a> to cache properly. This is particularly useful if you tag your URLs with tracking/marketing parameters, for example.
 	QueryString *QueryString `json:"query_string,omitempty"`
 
@@ -227,9 +229,6 @@ type Cdn struct {
 
 	// Url URL of the CDN Resource. Automatically generated when the CDN Resource is created. The number is the same as the CDN Resource ID.
 	Url string `json:"url"`
-
-	// Waf Protect your website against XSS, SQL injection and more with our SmartWAF. We're using OWASP Core Rule Set (CRS) to protect your data against the most exploited vulnerabilities.
-	Waf *Waf `json:"waf,omitempty"`
 }
 
 // CdnSsl defines model for cdnSsl.
@@ -292,6 +291,9 @@ type ContentDispositionType string
 // ContinentCode We recognize 8 continents specified with two letter Continent code.
 type ContinentCode string
 
+// DiskType defines model for diskType.
+type DiskType int
+
 // EditSsl defines model for editSsl.
 type EditSsl struct {
 	// Certificate SNI certificate.
@@ -320,14 +322,6 @@ type GeoProtection struct {
 
 	// Type With "type": "blocklist" all values set are not allowed. With "type": "passlist" only values set are allowed.
 	Type AccessProtectionType `json:"type"`
-}
-
-// GetObjectStorageStats defines model for getObjectStorageStats.
-type GetObjectStorageStats struct {
-	Aggregation string    `json:"aggregation"`
-	Buckets     *[]string `json:"buckets,omitempty"`
-	From        int       `json:"from"`
-	To          int       `json:"to"`
 }
 
 // Headers defines model for headers.
@@ -399,11 +393,12 @@ type NewSsl struct {
 
 // ObjectStorageCluster defines model for objectStorageCluster.
 type ObjectStorageCluster struct {
-	Host   string `json:"host"`
-	Id     string `json:"id"`
-	Label  string `json:"label"`
-	Port   *int   `json:"port,omitempty"`
-	Scheme string `json:"scheme"`
+	DiskType *DiskType `json:"diskType,omitempty"`
+	Host     string    `json:"host"`
+	Id       string    `json:"id"`
+	Label    string    `json:"label"`
+	Port     *int      `json:"port,omitempty"`
+	Scheme   string    `json:"scheme"`
 }
 
 // ObjectStorageClusters defines model for objectStorageClusters.
@@ -411,11 +406,8 @@ type ObjectStorageClusters = []ObjectStorageCluster
 
 // ObjectStorageOriginDetail CDN77 Object Storage Origin detail
 type ObjectStorageOriginDetail struct {
-	// AccessKeyId Access key to your bucket.
-	AccessKeyId *string `json:"access_key_id,omitempty"`
-
-	// AccessSecret Access secret to your bucket.
-	AccessSecret *string `json:"access_secret,omitempty"`
+	// BaseDir Base directory for the object storage. This is optional and can be used to specify a subdirectory in the bucket. If not specified, the root of the bucket will be used.
+	BaseDir *string `json:"base_dir,omitempty"`
 
 	// BucketName Name of your bucket.
 	BucketName string `json:"bucket_name"`
@@ -437,25 +429,14 @@ type ObjectStorageOriginDetail struct {
 	Note nullable.Nullable[string] `json:"note,omitempty"`
 
 	// Port Origin port. If not specified, the default scheme port is used. Allowed range is between 1 and 65535.
-	Port   nullable.Nullable[int] `json:"port,omitempty"`
-	Scheme OriginScheme           `json:"scheme"`
-	Type   ConnectionType         `json:"type"`
-	Usage  ObjectStorageUsage     `json:"usage"`
-}
+	Port nullable.Nullable[int] `json:"port,omitempty"`
 
-// ObjectStorageStats defines model for objectStorageStats.
-type ObjectStorageStats struct {
-	Timestamp int     `json:"timestamp"`
-	Value     float32 `json:"value"`
+	// PrimaryOriginId Origin ID.
+	PrimaryOriginId *string            `json:"primary_origin_id,omitempty"`
+	Scheme          OriginScheme       `json:"scheme"`
+	Type            ConnectionType     `json:"type"`
+	Usage           ObjectStorageUsage `json:"usage"`
 }
-
-// ObjectStorageStatsSet defines model for objectStorageStatsSet.
-type ObjectStorageStatsSet struct {
-	Stats *[]ObjectStorageStats `json:"stats,omitempty"`
-}
-
-// ObjectStorageStatsType defines model for objectStorageStatsType.
-type ObjectStorageStatsType string
 
 // ObjectStorageUsage defines model for objectStorageUsage.
 type ObjectStorageUsage struct {
@@ -475,16 +456,11 @@ type OriginCdn struct {
 // OriginHeaders defines model for originHeaders.
 type OriginHeaders struct {
 	// Custom Custom HTTP headers included in requests sent to the origin server.
-	Custom nullable.Nullable[map[string]string] `json:"custom,omitempty"`
+	Custom nullable.Nullable[map[string]string] `json:"custom"`
 }
 
 // OriginList defines model for originList.
 type OriginList = []OriginList_Item
-
-// OriginProtection Enabled origin protection can ease the load on your server or even hide it from direct incoming traffic with our proxy servers.
-type OriginProtection struct {
-	Enabled bool `json:"enabled"`
-}
 
 // OriginScheme defines model for originScheme.
 type OriginScheme string
@@ -666,11 +642,6 @@ type UsageDetailSchema struct {
 	Time  *time.Time `json:"time,omitempty"`
 }
 
-// Waf Protect your website against XSS, SQL injection and more with our SmartWAF. We're using OWASP Core Rule Set (CRS) to protect your data against the most exploited vulnerabilities.
-type Waf struct {
-	Enabled bool `json:"enabled"`
-}
-
 // OriginList_Item defines model for originList.Item.
 type OriginList_Item struct {
 	union json.RawMessage
@@ -678,17 +649,47 @@ type OriginList_Item struct {
 
 // CdnAddJSONBody defines parameters for CdnAdd.
 type CdnAddJSONBody struct {
-	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
+	// Cache Your files will remain cached for the specified duration, after which your origin will be checked for an updated version of your files. Expiry/cache-control headers override this setting.
+	Cache *Cache `json:"cache,omitempty"`
+
+	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate.Maximum number of CNAMEs is "10". To add more, contact our support.
 	Cnames *[]string `json:"cnames,omitempty"`
+
+	// GeoProtection Geo protection enables you to control which countries can access your content directly.
+	GeoProtection *GeoProtection `json:"geo_protection,omitempty"`
+	Headers       *Headers       `json:"headers,omitempty"`
+
+	// HotlinkProtection Hotlink protection enables you to control which hostnames/domains can link to and access your content directly.
+	HotlinkProtection *HotlinkProtection `json:"hotlink_protection,omitempty"`
+
+	// HttpsRedirect If enabled, all requests via HTTP are redirected to HTTPS. Verify HTTPS availability of CNAMEs before activating, if applicable.
+	HttpsRedirect *HttpsRedirect `json:"https_redirect,omitempty"`
+
+	// IpProtection IP protection enables you to control which networks can access your content directly.
+	IpProtection *IpProtection `json:"ip_protection,omitempty"`
 
 	// Label The label helps you to identify your CDN Resource.
 	Label string `json:"label"`
 
+	// Mp4PseudoStreaming Turn this option on if using a flash-based video player with MP4 files. Pseudo-streaming is used mainly in flash players. HTML5 players use range-requests. When enabled the "query_string" option must be set to ignore all parameters.
+	Mp4PseudoStreaming *Mp4PseudoStreaming `json:"mp4_pseudo_streaming,omitempty"`
+
 	// Note Optional note for the CDN Resource.
-	Note nullable.Nullable[string] `json:"note,omitempty"`
+	Note          nullable.Nullable[string] `json:"note,omitempty"`
+	OriginHeaders *OriginHeaders            `json:"origin_headers,omitempty"`
 
 	// OriginId ID of attached Origin (content source for CDN Resource). More information in our <a href="/support/api-docs/v3/origin">Origin</a> API documentation.
 	OriginId string `json:"origin_id"`
+
+	// QueryString Enabling this feature will ignore the query string, allowing URLs with <a href="https://en.wikipedia.org/wiki/Query_string">query strings</a> to cache properly. This is particularly useful if you tag your URLs with tracking/marketing parameters, for example.
+	QueryString *QueryString `json:"query_string,omitempty"`
+
+	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs"  URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
+	RateLimit *RateLimit `json:"rate_limit,omitempty"`
+
+	// SecureToken This feature allows you to serve your content using signed URLs. You can enable your users to download secured content from the CDN Resource with a valid hash. Note: When you check this option, make sure to generate secured links to access your content. Maximum length is 64 characters.
+	SecureToken *SecureToken `json:"secure_token,omitempty"`
+	Ssl         *CdnSsl      `json:"ssl,omitempty"`
 }
 
 // CdnEditJSONBody defines parameters for CdnEdit.
@@ -734,22 +735,10 @@ type CdnEditJSONBody struct {
 	// SecureToken This feature allows you to serve your content using signed URLs. You can enable your users to download secured content from the CDN Resource with a valid hash. Note: When you check this option, make sure to generate secured links to access your content. Maximum length is 64 characters.
 	SecureToken *SecureToken `json:"secure_token,omitempty"`
 	Ssl         *CdnSsl      `json:"ssl,omitempty"`
-
-	// Waf Protect your website against XSS, SQL injection and more with our SmartWAF. We're using OWASP Core Rule Set (CRS) to protect your data against the most exploited vulnerabilities.
-	Waf *Waf `json:"waf,omitempty"`
 }
 
-// CnameAddJSONBody defines parameters for CnameAdd.
-type CnameAddJSONBody struct {
-	// Cname <a href="https://en.wikipedia.org/wiki/CNAME_record" target="_blank">CNAME</a> should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate for any CNAME assigned to CDN Resource.
-	Cname string `json:"cname"`
-}
-
-// CdnDatacentersEnableJSONBody defines parameters for CdnDatacentersEnable.
-type CdnDatacentersEnableJSONBody = []openapi_types.UUID
-
-// OriginAddAwsJSONBody defines parameters for OriginAddAws.
-type OriginAddAwsJSONBody struct {
+// OriginCreateAwsJSONBody defines parameters for OriginCreateAws.
+type OriginCreateAwsJSONBody struct {
 	// AwsAccessKeyId Located in the Security Credentials section of your AWS account.
 	AwsAccessKeyId nullable.Nullable[string] `json:"aws_access_key_id,omitempty"`
 
@@ -788,18 +777,22 @@ type OriginEditAwsJSONBody struct {
 	// Note Optional note for the Origin.
 	Note   nullable.Nullable[string] `json:"note,omitempty"`
 	Port   nullable.Nullable[int]    `json:"port,omitempty"`
-	Scheme *string                   `json:"scheme,omitempty"`
+	Scheme *OriginScheme             `json:"scheme,omitempty"`
 }
 
-// OriginAddObjectStorageJSONBody defines parameters for OriginAddObjectStorage.
-type OriginAddObjectStorageJSONBody struct {
-	Acl        AclType `json:"acl"`
-	BucketName string  `json:"bucket_name"`
+// OriginCreateObjectStorageJSONBody defines parameters for OriginCreateObjectStorage.
+type OriginCreateObjectStorageJSONBody struct {
+	Acl AclType `json:"acl"`
+
+	// BucketName Bucket name must be a unique label within the selected cluster.
+	BucketName string `json:"bucket_name"`
 
 	// ClusterId Cluster ID
-	ClusterId string                    `json:"cluster_id"`
-	Label     string                    `json:"label"`
-	Note      nullable.Nullable[string] `json:"note,omitempty"`
+	ClusterId string `json:"cluster_id"`
+
+	// Label Your label for the bucket. Must be unique for your account.
+	Label string                    `json:"label"`
+	Note  nullable.Nullable[string] `json:"note,omitempty"`
 }
 
 // OriginEditObjectStorageJSONBody defines parameters for OriginEditObjectStorage.
@@ -809,21 +802,14 @@ type OriginEditObjectStorageJSONBody struct {
 		AccessKeyId *string     `json:"access_key_id,omitempty"`
 		Type        *AccessType `json:"type,omitempty"`
 	} `json:"access_keys,omitempty"`
-	Label *string                   `json:"label,omitempty"`
-	Note  nullable.Nullable[string] `json:"note,omitempty"`
+
+	// BaseDir Base directory
+	BaseDir *string                   `json:"base_dir,omitempty"`
+	Note    nullable.Nullable[string] `json:"note,omitempty"`
 }
 
-// OriginEditStorageJSONBody defines parameters for OriginEditStorage.
-type OriginEditStorageJSONBody struct {
-	Label *string `json:"label,omitempty"`
-
-	// Note Optional note for the Origin.
-	Note     nullable.Nullable[string] `json:"note,omitempty"`
-	Password *string                   `json:"password,omitempty"`
-}
-
-// OriginAddUrlJSONBody defines parameters for OriginAddUrl.
-type OriginAddUrlJSONBody struct {
+// OriginCreateUrlJSONBody defines parameters for OriginCreateUrl.
+type OriginCreateUrlJSONBody struct {
 	// BaseDir Directory where the content is stored on the URL Origin. It must not end with the slash. Maximum length is 255.
 	BaseDir nullable.Nullable[string] `json:"base_dir,omitempty"`
 
@@ -850,7 +836,7 @@ type OriginEditUrlJSONBody struct {
 	// Note Optional note for the Origin.
 	Note   nullable.Nullable[string] `json:"note,omitempty"`
 	Port   nullable.Nullable[int]    `json:"port,omitempty"`
-	Scheme *string                   `json:"scheme,omitempty"`
+	Scheme *OriginScheme             `json:"scheme,omitempty"`
 }
 
 // CdnAddJSONRequestBody defines body for CdnAdd for application/json ContentType.
@@ -859,32 +845,20 @@ type CdnAddJSONRequestBody CdnAddJSONBody
 // CdnEditJSONRequestBody defines body for CdnEdit for application/json ContentType.
 type CdnEditJSONRequestBody CdnEditJSONBody
 
-// CnameAddJSONRequestBody defines body for CnameAdd for application/json ContentType.
-type CnameAddJSONRequestBody CnameAddJSONBody
-
-// CdnDatacentersEnableJSONRequestBody defines body for CdnDatacentersEnable for application/json ContentType.
-type CdnDatacentersEnableJSONRequestBody = CdnDatacentersEnableJSONBody
-
-// ObjectStorageStatsJSONRequestBody defines body for ObjectStorageStats for application/json ContentType.
-type ObjectStorageStatsJSONRequestBody = GetObjectStorageStats
-
-// OriginAddAwsJSONRequestBody defines body for OriginAddAws for application/json ContentType.
-type OriginAddAwsJSONRequestBody OriginAddAwsJSONBody
+// OriginCreateAwsJSONRequestBody defines body for OriginCreateAws for application/json ContentType.
+type OriginCreateAwsJSONRequestBody OriginCreateAwsJSONBody
 
 // OriginEditAwsJSONRequestBody defines body for OriginEditAws for application/json ContentType.
 type OriginEditAwsJSONRequestBody OriginEditAwsJSONBody
 
-// OriginAddObjectStorageJSONRequestBody defines body for OriginAddObjectStorage for application/json ContentType.
-type OriginAddObjectStorageJSONRequestBody OriginAddObjectStorageJSONBody
+// OriginCreateObjectStorageJSONRequestBody defines body for OriginCreateObjectStorage for application/json ContentType.
+type OriginCreateObjectStorageJSONRequestBody OriginCreateObjectStorageJSONBody
 
 // OriginEditObjectStorageJSONRequestBody defines body for OriginEditObjectStorage for application/json ContentType.
 type OriginEditObjectStorageJSONRequestBody OriginEditObjectStorageJSONBody
 
-// OriginEditStorageJSONRequestBody defines body for OriginEditStorage for application/json ContentType.
-type OriginEditStorageJSONRequestBody OriginEditStorageJSONBody
-
-// OriginAddUrlJSONRequestBody defines body for OriginAddUrl for application/json ContentType.
-type OriginAddUrlJSONRequestBody OriginAddUrlJSONBody
+// OriginCreateUrlJSONRequestBody defines body for OriginCreateUrl for application/json ContentType.
+type OriginCreateUrlJSONRequestBody OriginCreateUrlJSONBody
 
 // OriginEditUrlJSONRequestBody defines body for OriginEditUrl for application/json ContentType.
 type OriginEditUrlJSONRequestBody OriginEditUrlJSONBody
@@ -1139,34 +1113,19 @@ type ClientInterface interface {
 	// CnameList request
 	CnameList(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CnameAddWithBody request with any body
-	CnameAddWithBody(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	CnameAdd(ctx context.Context, id int, body CnameAddJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// CdnDatacentersList request
 	CdnDatacentersList(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CdnDatacentersEnableWithBody request with any body
-	CdnDatacentersEnableWithBody(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	CdnDatacentersEnable(ctx context.Context, id int, body CdnDatacentersEnableJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ObjectStorageClusterList request
 	ObjectStorageClusterList(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ObjectStorageStatsWithBody request with any body
-	ObjectStorageStatsWithBody(ctx context.Context, pType ObjectStorageStatsType, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	ObjectStorageStats(ctx context.Context, pType ObjectStorageStatsType, body ObjectStorageStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// OriginList request
 	OriginList(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// OriginAddAwsWithBody request with any body
-	OriginAddAwsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// OriginCreateAwsWithBody request with any body
+	OriginCreateAwsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	OriginAddAws(ctx context.Context, body OriginAddAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	OriginCreateAws(ctx context.Context, body OriginCreateAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// OriginDeleteAws request
 	OriginDeleteAws(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1179,10 +1138,10 @@ type ClientInterface interface {
 
 	OriginEditAws(ctx context.Context, id string, body OriginEditAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// OriginAddObjectStorageWithBody request with any body
-	OriginAddObjectStorageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// OriginCreateObjectStorageWithBody request with any body
+	OriginCreateObjectStorageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	OriginAddObjectStorage(ctx context.Context, body OriginAddObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	OriginCreateObjectStorage(ctx context.Context, body OriginCreateObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// OriginDeleteObjectStorage request
 	OriginDeleteObjectStorage(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1195,21 +1154,13 @@ type ClientInterface interface {
 
 	OriginEditObjectStorage(ctx context.Context, id string, body OriginEditObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// OriginDeleteStorage request
-	OriginDeleteStorage(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// OriginDetailStorage request
 	OriginDetailStorage(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// OriginEditStorageWithBody request with any body
-	OriginEditStorageWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// OriginCreateUrlWithBody request with any body
+	OriginCreateUrlWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	OriginEditStorage(ctx context.Context, id string, body OriginEditStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// OriginAddUrlWithBody request with any body
-	OriginAddUrlWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	OriginAddUrl(ctx context.Context, body OriginAddUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	OriginCreateUrl(ctx context.Context, body OriginCreateUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// OriginDeleteUrl request
 	OriginDeleteUrl(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1338,56 +1289,8 @@ func (c *Client) CnameList(ctx context.Context, id int, reqEditors ...RequestEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) CnameAddWithBody(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCnameAddRequestWithBody(c.Server, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CnameAdd(ctx context.Context, id int, body CnameAddJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCnameAddRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) CdnDatacentersList(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCdnDatacentersListRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CdnDatacentersEnableWithBody(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCdnDatacentersEnableRequestWithBody(c.Server, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CdnDatacentersEnable(ctx context.Context, id int, body CdnDatacentersEnableJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCdnDatacentersEnableRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1410,30 +1313,6 @@ func (c *Client) ObjectStorageClusterList(ctx context.Context, reqEditors ...Req
 	return c.Client.Do(req)
 }
 
-func (c *Client) ObjectStorageStatsWithBody(ctx context.Context, pType ObjectStorageStatsType, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewObjectStorageStatsRequestWithBody(c.Server, pType, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) ObjectStorageStats(ctx context.Context, pType ObjectStorageStatsType, body ObjectStorageStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewObjectStorageStatsRequest(c.Server, pType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) OriginList(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewOriginListRequest(c.Server)
 	if err != nil {
@@ -1446,8 +1325,8 @@ func (c *Client) OriginList(ctx context.Context, reqEditors ...RequestEditorFn) 
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginAddAwsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddAwsRequestWithBody(c.Server, contentType, body)
+func (c *Client) OriginCreateAwsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateAwsRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1458,8 +1337,8 @@ func (c *Client) OriginAddAwsWithBody(ctx context.Context, contentType string, b
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginAddAws(ctx context.Context, body OriginAddAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddAwsRequest(c.Server, body)
+func (c *Client) OriginCreateAws(ctx context.Context, body OriginCreateAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateAwsRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1518,8 +1397,8 @@ func (c *Client) OriginEditAws(ctx context.Context, id string, body OriginEditAw
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginAddObjectStorageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddObjectStorageRequestWithBody(c.Server, contentType, body)
+func (c *Client) OriginCreateObjectStorageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateObjectStorageRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1530,8 +1409,8 @@ func (c *Client) OriginAddObjectStorageWithBody(ctx context.Context, contentType
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginAddObjectStorage(ctx context.Context, body OriginAddObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddObjectStorageRequest(c.Server, body)
+func (c *Client) OriginCreateObjectStorage(ctx context.Context, body OriginCreateObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateObjectStorageRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1590,18 +1469,6 @@ func (c *Client) OriginEditObjectStorage(ctx context.Context, id string, body Or
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginDeleteStorage(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginDeleteStorageRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) OriginDetailStorage(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewOriginDetailStorageRequest(c.Server, id)
 	if err != nil {
@@ -1614,8 +1481,8 @@ func (c *Client) OriginDetailStorage(ctx context.Context, id string, reqEditors 
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginEditStorageWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginEditStorageRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) OriginCreateUrlWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateUrlRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1626,32 +1493,8 @@ func (c *Client) OriginEditStorageWithBody(ctx context.Context, id string, conte
 	return c.Client.Do(req)
 }
 
-func (c *Client) OriginEditStorage(ctx context.Context, id string, body OriginEditStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginEditStorageRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) OriginAddUrlWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddUrlRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) OriginAddUrl(ctx context.Context, body OriginAddUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewOriginAddUrlRequest(c.Server, body)
+func (c *Client) OriginCreateUrl(ctx context.Context, body OriginCreateUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOriginCreateUrlRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2010,53 +1853,6 @@ func NewCnameListRequest(server string, id int) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCnameAddRequest calls the generic CnameAdd builder with application/json body
-func NewCnameAddRequest(server string, id int, body CnameAddJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCnameAddRequestWithBody(server, id, "application/json", bodyReader)
-}
-
-// NewCnameAddRequestWithBody generates requests for CnameAdd with any type of body
-func NewCnameAddRequestWithBody(server string, id int, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v3/cdn/%s/cname", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewCdnDatacentersListRequest generates requests for CdnDatacentersList
 func NewCdnDatacentersListRequest(server string, id int) (*http.Request, error) {
 	var err error
@@ -2091,53 +1887,6 @@ func NewCdnDatacentersListRequest(server string, id int) (*http.Request, error) 
 	return req, nil
 }
 
-// NewCdnDatacentersEnableRequest calls the generic CdnDatacentersEnable builder with application/json body
-func NewCdnDatacentersEnableRequest(server string, id int, body CdnDatacentersEnableJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCdnDatacentersEnableRequestWithBody(server, id, "application/json", bodyReader)
-}
-
-// NewCdnDatacentersEnableRequestWithBody generates requests for CdnDatacentersEnable with any type of body
-func NewCdnDatacentersEnableRequestWithBody(server string, id int, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v3/cdn/%s/datacenters", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewObjectStorageClusterListRequest generates requests for ObjectStorageClusterList
 func NewObjectStorageClusterListRequest(server string) (*http.Request, error) {
 	var err error
@@ -2161,53 +1910,6 @@ func NewObjectStorageClusterListRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return req, nil
-}
-
-// NewObjectStorageStatsRequest calls the generic ObjectStorageStats builder with application/json body
-func NewObjectStorageStatsRequest(server string, pType ObjectStorageStatsType, body ObjectStorageStatsJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewObjectStorageStatsRequestWithBody(server, pType, "application/json", bodyReader)
-}
-
-// NewObjectStorageStatsRequestWithBody generates requests for ObjectStorageStats with any type of body
-func NewObjectStorageStatsRequestWithBody(server string, pType ObjectStorageStatsType, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "type", runtime.ParamLocationPath, pType)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v3/object-storage/stats/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2239,19 +1941,19 @@ func NewOriginListRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewOriginAddAwsRequest calls the generic OriginAddAws builder with application/json body
-func NewOriginAddAwsRequest(server string, body OriginAddAwsJSONRequestBody) (*http.Request, error) {
+// NewOriginCreateAwsRequest calls the generic OriginCreateAws builder with application/json body
+func NewOriginCreateAwsRequest(server string, body OriginCreateAwsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewOriginAddAwsRequestWithBody(server, "application/json", bodyReader)
+	return NewOriginCreateAwsRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewOriginAddAwsRequestWithBody generates requests for OriginAddAws with any type of body
-func NewOriginAddAwsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewOriginCreateAwsRequestWithBody generates requests for OriginCreateAws with any type of body
+func NewOriginCreateAwsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2394,19 +2096,19 @@ func NewOriginEditAwsRequestWithBody(server string, id string, contentType strin
 	return req, nil
 }
 
-// NewOriginAddObjectStorageRequest calls the generic OriginAddObjectStorage builder with application/json body
-func NewOriginAddObjectStorageRequest(server string, body OriginAddObjectStorageJSONRequestBody) (*http.Request, error) {
+// NewOriginCreateObjectStorageRequest calls the generic OriginCreateObjectStorage builder with application/json body
+func NewOriginCreateObjectStorageRequest(server string, body OriginCreateObjectStorageJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewOriginAddObjectStorageRequestWithBody(server, "application/json", bodyReader)
+	return NewOriginCreateObjectStorageRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewOriginAddObjectStorageRequestWithBody generates requests for OriginAddObjectStorage with any type of body
-func NewOriginAddObjectStorageRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewOriginCreateObjectStorageRequestWithBody generates requests for OriginCreateObjectStorage with any type of body
+func NewOriginCreateObjectStorageRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2549,40 +2251,6 @@ func NewOriginEditObjectStorageRequestWithBody(server string, id string, content
 	return req, nil
 }
 
-// NewOriginDeleteStorageRequest generates requests for OriginDeleteStorage
-func NewOriginDeleteStorageRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v3/origin/storage/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewOriginDetailStorageRequest generates requests for OriginDetailStorage
 func NewOriginDetailStorageRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -2617,66 +2285,19 @@ func NewOriginDetailStorageRequest(server string, id string) (*http.Request, err
 	return req, nil
 }
 
-// NewOriginEditStorageRequest calls the generic OriginEditStorage builder with application/json body
-func NewOriginEditStorageRequest(server string, id string, body OriginEditStorageJSONRequestBody) (*http.Request, error) {
+// NewOriginCreateUrlRequest calls the generic OriginCreateUrl builder with application/json body
+func NewOriginCreateUrlRequest(server string, body OriginCreateUrlJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewOriginEditStorageRequestWithBody(server, id, "application/json", bodyReader)
+	return NewOriginCreateUrlRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewOriginEditStorageRequestWithBody generates requests for OriginEditStorage with any type of body
-func NewOriginEditStorageRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v3/origin/storage/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PATCH", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewOriginAddUrlRequest calls the generic OriginAddUrl builder with application/json body
-func NewOriginAddUrlRequest(server string, body OriginAddUrlJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewOriginAddUrlRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewOriginAddUrlRequestWithBody generates requests for OriginAddUrl with any type of body
-func NewOriginAddUrlRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewOriginCreateUrlRequestWithBody generates requests for OriginCreateUrl with any type of body
+func NewOriginCreateUrlRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3066,34 +2687,19 @@ type ClientWithResponsesInterface interface {
 	// CnameListWithResponse request
 	CnameListWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*CnameListResponse, error)
 
-	// CnameAddWithBodyWithResponse request with any body
-	CnameAddWithBodyWithResponse(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CnameAddResponse, error)
-
-	CnameAddWithResponse(ctx context.Context, id int, body CnameAddJSONRequestBody, reqEditors ...RequestEditorFn) (*CnameAddResponse, error)
-
 	// CdnDatacentersListWithResponse request
 	CdnDatacentersListWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*CdnDatacentersListResponse, error)
-
-	// CdnDatacentersEnableWithBodyWithResponse request with any body
-	CdnDatacentersEnableWithBodyWithResponse(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CdnDatacentersEnableResponse, error)
-
-	CdnDatacentersEnableWithResponse(ctx context.Context, id int, body CdnDatacentersEnableJSONRequestBody, reqEditors ...RequestEditorFn) (*CdnDatacentersEnableResponse, error)
 
 	// ObjectStorageClusterListWithResponse request
 	ObjectStorageClusterListWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ObjectStorageClusterListResponse, error)
 
-	// ObjectStorageStatsWithBodyWithResponse request with any body
-	ObjectStorageStatsWithBodyWithResponse(ctx context.Context, pType ObjectStorageStatsType, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ObjectStorageStatsResponse, error)
-
-	ObjectStorageStatsWithResponse(ctx context.Context, pType ObjectStorageStatsType, body ObjectStorageStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*ObjectStorageStatsResponse, error)
-
 	// OriginListWithResponse request
 	OriginListWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*OriginListResponse, error)
 
-	// OriginAddAwsWithBodyWithResponse request with any body
-	OriginAddAwsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddAwsResponse, error)
+	// OriginCreateAwsWithBodyWithResponse request with any body
+	OriginCreateAwsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateAwsResponse, error)
 
-	OriginAddAwsWithResponse(ctx context.Context, body OriginAddAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddAwsResponse, error)
+	OriginCreateAwsWithResponse(ctx context.Context, body OriginCreateAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateAwsResponse, error)
 
 	// OriginDeleteAwsWithResponse request
 	OriginDeleteAwsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDeleteAwsResponse, error)
@@ -3106,10 +2712,10 @@ type ClientWithResponsesInterface interface {
 
 	OriginEditAwsWithResponse(ctx context.Context, id string, body OriginEditAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginEditAwsResponse, error)
 
-	// OriginAddObjectStorageWithBodyWithResponse request with any body
-	OriginAddObjectStorageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddObjectStorageResponse, error)
+	// OriginCreateObjectStorageWithBodyWithResponse request with any body
+	OriginCreateObjectStorageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateObjectStorageResponse, error)
 
-	OriginAddObjectStorageWithResponse(ctx context.Context, body OriginAddObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddObjectStorageResponse, error)
+	OriginCreateObjectStorageWithResponse(ctx context.Context, body OriginCreateObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateObjectStorageResponse, error)
 
 	// OriginDeleteObjectStorageWithResponse request
 	OriginDeleteObjectStorageWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDeleteObjectStorageResponse, error)
@@ -3122,21 +2728,13 @@ type ClientWithResponsesInterface interface {
 
 	OriginEditObjectStorageWithResponse(ctx context.Context, id string, body OriginEditObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginEditObjectStorageResponse, error)
 
-	// OriginDeleteStorageWithResponse request
-	OriginDeleteStorageWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDeleteStorageResponse, error)
-
 	// OriginDetailStorageWithResponse request
 	OriginDetailStorageWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDetailStorageResponse, error)
 
-	// OriginEditStorageWithBodyWithResponse request with any body
-	OriginEditStorageWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginEditStorageResponse, error)
+	// OriginCreateUrlWithBodyWithResponse request with any body
+	OriginCreateUrlWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateUrlResponse, error)
 
-	OriginEditStorageWithResponse(ctx context.Context, id string, body OriginEditStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginEditStorageResponse, error)
-
-	// OriginAddUrlWithBodyWithResponse request with any body
-	OriginAddUrlWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddUrlResponse, error)
-
-	OriginAddUrlWithResponse(ctx context.Context, body OriginAddUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddUrlResponse, error)
+	OriginCreateUrlWithResponse(ctx context.Context, body OriginCreateUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateUrlResponse, error)
 
 	// OriginDeleteUrlWithResponse request
 	OriginDeleteUrlWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDeleteUrlResponse, error)
@@ -3311,30 +2909,6 @@ func (r CnameListResponse) StatusCode() int {
 	return 0
 }
 
-type CnameAddResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON404      *Errors
-	JSON422      *FieldErrors
-	JSONDefault  *Errors
-}
-
-// Status returns HTTPResponse.Status
-func (r CnameAddResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CnameAddResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type CdnDatacentersListResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3347,6 +2921,9 @@ type CdnDatacentersListResponse struct {
 		// Country Datacenter location country name.
 		Country *string `json:"country,omitempty"`
 
+		// CountryIso Datacenter location country ISO code.
+		CountryIso *string `json:"country_iso,omitempty"`
+
 		// IsEnabled Enabled status of the datacenter location.
 		IsEnabled *bool    `json:"is_enabled,omitempty"`
 		Latitude  *float32 `json:"latitude,omitempty"`
@@ -3354,6 +2931,9 @@ type CdnDatacentersListResponse struct {
 		// LocationId ID of Location. More information in our <a href="/support/api-docs/v3/datacenter">Datacenter</a> API documentation.
 		LocationId *string  `json:"location_id,omitempty"`
 		Longitude  *float32 `json:"longitude,omitempty"`
+
+		// Type Data center location type: "full" for Super PoPs, "cache" for Embedded PoPs.
+		Type *LocationType `json:"type,omitempty"`
 	}
 	JSON404     *Errors
 	JSON422     *FieldErrors
@@ -3370,29 +2950,6 @@ func (r CdnDatacentersListResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CdnDatacentersListResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type CdnDatacentersEnableResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON422      *Errors
-	JSONDefault  *Errors
-}
-
-// Status returns HTTPResponse.Status
-func (r CdnDatacentersEnableResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CdnDatacentersEnableResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3422,29 +2979,6 @@ func (r ObjectStorageClusterListResponse) StatusCode() int {
 	return 0
 }
 
-type ObjectStorageStatsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ObjectStorageStatsSet
-	JSONDefault  *Errors
-}
-
-// Status returns HTTPResponse.Status
-func (r ObjectStorageStatsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ObjectStorageStatsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type OriginListResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3468,7 +3002,7 @@ func (r OriginListResponse) StatusCode() int {
 	return 0
 }
 
-type OriginAddAwsResponse struct {
+type OriginCreateAwsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *S3OriginDetail
@@ -3477,7 +3011,7 @@ type OriginAddAwsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r OriginAddAwsResponse) Status() string {
+func (r OriginCreateAwsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3485,7 +3019,7 @@ func (r OriginAddAwsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r OriginAddAwsResponse) StatusCode() int {
+func (r OriginCreateAwsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3564,7 +3098,7 @@ func (r OriginEditAwsResponse) StatusCode() int {
 	return 0
 }
 
-type OriginAddObjectStorageResponse struct {
+type OriginCreateObjectStorageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *ObjectStorageOriginDetail
@@ -3573,7 +3107,7 @@ type OriginAddObjectStorageResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r OriginAddObjectStorageResponse) Status() string {
+func (r OriginCreateObjectStorageResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3581,7 +3115,7 @@ func (r OriginAddObjectStorageResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r OriginAddObjectStorageResponse) StatusCode() int {
+func (r OriginCreateObjectStorageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3660,28 +3194,6 @@ func (r OriginEditObjectStorageResponse) StatusCode() int {
 	return 0
 }
 
-type OriginDeleteStorageResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON404      *Errors
-}
-
-// Status returns HTTPResponse.Status
-func (r OriginDeleteStorageResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r OriginDeleteStorageResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type OriginDetailStorageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3706,30 +3218,7 @@ func (r OriginDetailStorageResponse) StatusCode() int {
 	return 0
 }
 
-type OriginEditStorageResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON404      *Errors
-	JSON422      *FieldErrors
-}
-
-// Status returns HTTPResponse.Status
-func (r OriginEditStorageResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r OriginEditStorageResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type OriginAddUrlResponse struct {
+type OriginCreateUrlResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *UrlOriginDetail
@@ -3738,7 +3227,7 @@ type OriginAddUrlResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r OriginAddUrlResponse) Status() string {
+func (r OriginCreateUrlResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3746,7 +3235,7 @@ func (r OriginAddUrlResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r OriginAddUrlResponse) StatusCode() int {
+func (r OriginCreateUrlResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4013,23 +3502,6 @@ func (c *ClientWithResponses) CnameListWithResponse(ctx context.Context, id int,
 	return ParseCnameListResponse(rsp)
 }
 
-// CnameAddWithBodyWithResponse request with arbitrary body returning *CnameAddResponse
-func (c *ClientWithResponses) CnameAddWithBodyWithResponse(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CnameAddResponse, error) {
-	rsp, err := c.CnameAddWithBody(ctx, id, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCnameAddResponse(rsp)
-}
-
-func (c *ClientWithResponses) CnameAddWithResponse(ctx context.Context, id int, body CnameAddJSONRequestBody, reqEditors ...RequestEditorFn) (*CnameAddResponse, error) {
-	rsp, err := c.CnameAdd(ctx, id, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCnameAddResponse(rsp)
-}
-
 // CdnDatacentersListWithResponse request returning *CdnDatacentersListResponse
 func (c *ClientWithResponses) CdnDatacentersListWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*CdnDatacentersListResponse, error) {
 	rsp, err := c.CdnDatacentersList(ctx, id, reqEditors...)
@@ -4037,23 +3509,6 @@ func (c *ClientWithResponses) CdnDatacentersListWithResponse(ctx context.Context
 		return nil, err
 	}
 	return ParseCdnDatacentersListResponse(rsp)
-}
-
-// CdnDatacentersEnableWithBodyWithResponse request with arbitrary body returning *CdnDatacentersEnableResponse
-func (c *ClientWithResponses) CdnDatacentersEnableWithBodyWithResponse(ctx context.Context, id int, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CdnDatacentersEnableResponse, error) {
-	rsp, err := c.CdnDatacentersEnableWithBody(ctx, id, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCdnDatacentersEnableResponse(rsp)
-}
-
-func (c *ClientWithResponses) CdnDatacentersEnableWithResponse(ctx context.Context, id int, body CdnDatacentersEnableJSONRequestBody, reqEditors ...RequestEditorFn) (*CdnDatacentersEnableResponse, error) {
-	rsp, err := c.CdnDatacentersEnable(ctx, id, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCdnDatacentersEnableResponse(rsp)
 }
 
 // ObjectStorageClusterListWithResponse request returning *ObjectStorageClusterListResponse
@@ -4065,23 +3520,6 @@ func (c *ClientWithResponses) ObjectStorageClusterListWithResponse(ctx context.C
 	return ParseObjectStorageClusterListResponse(rsp)
 }
 
-// ObjectStorageStatsWithBodyWithResponse request with arbitrary body returning *ObjectStorageStatsResponse
-func (c *ClientWithResponses) ObjectStorageStatsWithBodyWithResponse(ctx context.Context, pType ObjectStorageStatsType, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ObjectStorageStatsResponse, error) {
-	rsp, err := c.ObjectStorageStatsWithBody(ctx, pType, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseObjectStorageStatsResponse(rsp)
-}
-
-func (c *ClientWithResponses) ObjectStorageStatsWithResponse(ctx context.Context, pType ObjectStorageStatsType, body ObjectStorageStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*ObjectStorageStatsResponse, error) {
-	rsp, err := c.ObjectStorageStats(ctx, pType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseObjectStorageStatsResponse(rsp)
-}
-
 // OriginListWithResponse request returning *OriginListResponse
 func (c *ClientWithResponses) OriginListWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*OriginListResponse, error) {
 	rsp, err := c.OriginList(ctx, reqEditors...)
@@ -4091,21 +3529,21 @@ func (c *ClientWithResponses) OriginListWithResponse(ctx context.Context, reqEdi
 	return ParseOriginListResponse(rsp)
 }
 
-// OriginAddAwsWithBodyWithResponse request with arbitrary body returning *OriginAddAwsResponse
-func (c *ClientWithResponses) OriginAddAwsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddAwsResponse, error) {
-	rsp, err := c.OriginAddAwsWithBody(ctx, contentType, body, reqEditors...)
+// OriginCreateAwsWithBodyWithResponse request with arbitrary body returning *OriginCreateAwsResponse
+func (c *ClientWithResponses) OriginCreateAwsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateAwsResponse, error) {
+	rsp, err := c.OriginCreateAwsWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginAddAwsResponse(rsp)
+	return ParseOriginCreateAwsResponse(rsp)
 }
 
-func (c *ClientWithResponses) OriginAddAwsWithResponse(ctx context.Context, body OriginAddAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddAwsResponse, error) {
-	rsp, err := c.OriginAddAws(ctx, body, reqEditors...)
+func (c *ClientWithResponses) OriginCreateAwsWithResponse(ctx context.Context, body OriginCreateAwsJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateAwsResponse, error) {
+	rsp, err := c.OriginCreateAws(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginAddAwsResponse(rsp)
+	return ParseOriginCreateAwsResponse(rsp)
 }
 
 // OriginDeleteAwsWithResponse request returning *OriginDeleteAwsResponse
@@ -4143,21 +3581,21 @@ func (c *ClientWithResponses) OriginEditAwsWithResponse(ctx context.Context, id 
 	return ParseOriginEditAwsResponse(rsp)
 }
 
-// OriginAddObjectStorageWithBodyWithResponse request with arbitrary body returning *OriginAddObjectStorageResponse
-func (c *ClientWithResponses) OriginAddObjectStorageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddObjectStorageResponse, error) {
-	rsp, err := c.OriginAddObjectStorageWithBody(ctx, contentType, body, reqEditors...)
+// OriginCreateObjectStorageWithBodyWithResponse request with arbitrary body returning *OriginCreateObjectStorageResponse
+func (c *ClientWithResponses) OriginCreateObjectStorageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateObjectStorageResponse, error) {
+	rsp, err := c.OriginCreateObjectStorageWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginAddObjectStorageResponse(rsp)
+	return ParseOriginCreateObjectStorageResponse(rsp)
 }
 
-func (c *ClientWithResponses) OriginAddObjectStorageWithResponse(ctx context.Context, body OriginAddObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddObjectStorageResponse, error) {
-	rsp, err := c.OriginAddObjectStorage(ctx, body, reqEditors...)
+func (c *ClientWithResponses) OriginCreateObjectStorageWithResponse(ctx context.Context, body OriginCreateObjectStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateObjectStorageResponse, error) {
+	rsp, err := c.OriginCreateObjectStorage(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginAddObjectStorageResponse(rsp)
+	return ParseOriginCreateObjectStorageResponse(rsp)
 }
 
 // OriginDeleteObjectStorageWithResponse request returning *OriginDeleteObjectStorageResponse
@@ -4195,15 +3633,6 @@ func (c *ClientWithResponses) OriginEditObjectStorageWithResponse(ctx context.Co
 	return ParseOriginEditObjectStorageResponse(rsp)
 }
 
-// OriginDeleteStorageWithResponse request returning *OriginDeleteStorageResponse
-func (c *ClientWithResponses) OriginDeleteStorageWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDeleteStorageResponse, error) {
-	rsp, err := c.OriginDeleteStorage(ctx, id, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseOriginDeleteStorageResponse(rsp)
-}
-
 // OriginDetailStorageWithResponse request returning *OriginDetailStorageResponse
 func (c *ClientWithResponses) OriginDetailStorageWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OriginDetailStorageResponse, error) {
 	rsp, err := c.OriginDetailStorage(ctx, id, reqEditors...)
@@ -4213,38 +3642,21 @@ func (c *ClientWithResponses) OriginDetailStorageWithResponse(ctx context.Contex
 	return ParseOriginDetailStorageResponse(rsp)
 }
 
-// OriginEditStorageWithBodyWithResponse request with arbitrary body returning *OriginEditStorageResponse
-func (c *ClientWithResponses) OriginEditStorageWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginEditStorageResponse, error) {
-	rsp, err := c.OriginEditStorageWithBody(ctx, id, contentType, body, reqEditors...)
+// OriginCreateUrlWithBodyWithResponse request with arbitrary body returning *OriginCreateUrlResponse
+func (c *ClientWithResponses) OriginCreateUrlWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginCreateUrlResponse, error) {
+	rsp, err := c.OriginCreateUrlWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginEditStorageResponse(rsp)
+	return ParseOriginCreateUrlResponse(rsp)
 }
 
-func (c *ClientWithResponses) OriginEditStorageWithResponse(ctx context.Context, id string, body OriginEditStorageJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginEditStorageResponse, error) {
-	rsp, err := c.OriginEditStorage(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) OriginCreateUrlWithResponse(ctx context.Context, body OriginCreateUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginCreateUrlResponse, error) {
+	rsp, err := c.OriginCreateUrl(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseOriginEditStorageResponse(rsp)
-}
-
-// OriginAddUrlWithBodyWithResponse request with arbitrary body returning *OriginAddUrlResponse
-func (c *ClientWithResponses) OriginAddUrlWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OriginAddUrlResponse, error) {
-	rsp, err := c.OriginAddUrlWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseOriginAddUrlResponse(rsp)
-}
-
-func (c *ClientWithResponses) OriginAddUrlWithResponse(ctx context.Context, body OriginAddUrlJSONRequestBody, reqEditors ...RequestEditorFn) (*OriginAddUrlResponse, error) {
-	rsp, err := c.OriginAddUrl(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseOriginAddUrlResponse(rsp)
+	return ParseOriginCreateUrlResponse(rsp)
 }
 
 // OriginDeleteUrlWithResponse request returning *OriginDeleteUrlResponse
@@ -4569,46 +3981,6 @@ func ParseCnameListResponse(rsp *http.Response) (*CnameListResponse, error) {
 	return response, nil
 }
 
-// ParseCnameAddResponse parses an HTTP response from a CnameAddWithResponse call
-func ParseCnameAddResponse(rsp *http.Response) (*CnameAddResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CnameAddResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
-		var dest FieldErrors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON422 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseCdnDatacentersListResponse parses an HTTP response from a CdnDatacentersListWithResponse call
 func ParseCdnDatacentersListResponse(rsp *http.Response) (*CdnDatacentersListResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4633,6 +4005,9 @@ func ParseCdnDatacentersListResponse(rsp *http.Response) (*CdnDatacentersListRes
 			// Country Datacenter location country name.
 			Country *string `json:"country,omitempty"`
 
+			// CountryIso Datacenter location country ISO code.
+			CountryIso *string `json:"country_iso,omitempty"`
+
 			// IsEnabled Enabled status of the datacenter location.
 			IsEnabled *bool    `json:"is_enabled,omitempty"`
 			Latitude  *float32 `json:"latitude,omitempty"`
@@ -4640,6 +4015,9 @@ func ParseCdnDatacentersListResponse(rsp *http.Response) (*CdnDatacentersListRes
 			// LocationId ID of Location. More information in our <a href="/support/api-docs/v3/datacenter">Datacenter</a> API documentation.
 			LocationId *string  `json:"location_id,omitempty"`
 			Longitude  *float32 `json:"longitude,omitempty"`
+
+			// Type Data center location type: "full" for Super PoPs, "cache" for Embedded PoPs.
+			Type *LocationType `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -4655,39 +4033,6 @@ func ParseCdnDatacentersListResponse(rsp *http.Response) (*CdnDatacentersListRes
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
 		var dest FieldErrors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON422 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCdnDatacentersEnableResponse parses an HTTP response from a CdnDatacentersEnableWithResponse call
-func ParseCdnDatacentersEnableResponse(rsp *http.Response) (*CdnDatacentersEnableResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CdnDatacentersEnableResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
-		var dest Errors
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4738,39 +4083,6 @@ func ParseObjectStorageClusterListResponse(rsp *http.Response) (*ObjectStorageCl
 	return response, nil
 }
 
-// ParseObjectStorageStatsResponse parses an HTTP response from a ObjectStorageStatsWithResponse call
-func ParseObjectStorageStatsResponse(rsp *http.Response) (*ObjectStorageStatsResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ObjectStorageStatsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ObjectStorageStatsSet
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseOriginListResponse parses an HTTP response from a OriginListWithResponse call
 func ParseOriginListResponse(rsp *http.Response) (*OriginListResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4804,15 +4116,15 @@ func ParseOriginListResponse(rsp *http.Response) (*OriginListResponse, error) {
 	return response, nil
 }
 
-// ParseOriginAddAwsResponse parses an HTTP response from a OriginAddAwsWithResponse call
-func ParseOriginAddAwsResponse(rsp *http.Response) (*OriginAddAwsResponse, error) {
+// ParseOriginCreateAwsResponse parses an HTTP response from a OriginCreateAwsWithResponse call
+func ParseOriginCreateAwsResponse(rsp *http.Response) (*OriginCreateAwsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &OriginAddAwsResponse{
+	response := &OriginCreateAwsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4964,15 +4276,15 @@ func ParseOriginEditAwsResponse(rsp *http.Response) (*OriginEditAwsResponse, err
 	return response, nil
 }
 
-// ParseOriginAddObjectStorageResponse parses an HTTP response from a OriginAddObjectStorageWithResponse call
-func ParseOriginAddObjectStorageResponse(rsp *http.Response) (*OriginAddObjectStorageResponse, error) {
+// ParseOriginCreateObjectStorageResponse parses an HTTP response from a OriginCreateObjectStorageWithResponse call
+func ParseOriginCreateObjectStorageResponse(rsp *http.Response) (*OriginCreateObjectStorageResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &OriginAddObjectStorageResponse{
+	response := &OriginCreateObjectStorageResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -5124,32 +4436,6 @@ func ParseOriginEditObjectStorageResponse(rsp *http.Response) (*OriginEditObject
 	return response, nil
 }
 
-// ParseOriginDeleteStorageResponse parses an HTTP response from a OriginDeleteStorageWithResponse call
-func ParseOriginDeleteStorageResponse(rsp *http.Response) (*OriginDeleteStorageResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &OriginDeleteStorageResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseOriginDetailStorageResponse parses an HTTP response from a OriginDetailStorageWithResponse call
 func ParseOriginDetailStorageResponse(rsp *http.Response) (*OriginDetailStorageResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -5190,48 +4476,15 @@ func ParseOriginDetailStorageResponse(rsp *http.Response) (*OriginDetailStorageR
 	return response, nil
 }
 
-// ParseOriginEditStorageResponse parses an HTTP response from a OriginEditStorageWithResponse call
-func ParseOriginEditStorageResponse(rsp *http.Response) (*OriginEditStorageResponse, error) {
+// ParseOriginCreateUrlResponse parses an HTTP response from a OriginCreateUrlWithResponse call
+func ParseOriginCreateUrlResponse(rsp *http.Response) (*OriginCreateUrlResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &OriginEditStorageResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Errors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
-		var dest FieldErrors
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON422 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseOriginAddUrlResponse parses an HTTP response from a OriginAddUrlWithResponse call
-func ParseOriginAddUrlResponse(rsp *http.Response) (*OriginAddUrlResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &OriginAddUrlResponse{
+	response := &OriginCreateUrlResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
