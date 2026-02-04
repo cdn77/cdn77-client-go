@@ -181,8 +181,7 @@ type Cdn struct {
 	Cache *Cache `json:"cache,omitempty"`
 
 	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10".To add more, contact our support.
-	Cnames              Cnames               `json:"cnames"`
-	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
+	Cnames Cnames `json:"cnames"`
 
 	// CreationTime Timestamp when CDN Resource was created.
 	CreationTime time.Time `json:"creation_time"`
@@ -695,7 +694,8 @@ type CdnAddJSONBody struct {
 	Cache *Cache `json:"cache,omitempty"`
 
 	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate.Maximum number of CNAMEs is "10". To add more, contact our support.
-	Cnames *[]string `json:"cnames,omitempty"`
+	Cnames              *[]string            `json:"cnames,omitempty"`
+	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
 
 	// GeoProtection Geo protection enables you to control which countries can access your content directly.
 	GeoProtection *GeoProtection `json:"geo_protection,omitempty"`
