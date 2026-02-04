@@ -181,7 +181,8 @@ type Cdn struct {
 	Cache *Cache `json:"cache,omitempty"`
 
 	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10".To add more, contact our support.
-	Cnames Cnames `json:"cnames"`
+	Cnames              Cnames               `json:"cnames"`
+	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
 
 	// CreationTime Timestamp when CDN Resource was created.
 	CreationTime time.Time `json:"creation_time"`
