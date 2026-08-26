@@ -24,10 +24,35 @@ const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
+// Defines values for Balancer.
+const (
+	Chash      Balancer = "chash"
+	Closest    Balancer = "closest"
+	RoundRobin Balancer = "round-robin"
+)
+
 // Defines values for LocationType.
 const (
 	LocationTypeCache LocationType = "cache"
 	LocationTypeFull  LocationType = "full"
+)
+
+// Defines values for ProxyNextUpstream.
+const (
+	Error         ProxyNextUpstream = "error"
+	Http403       ProxyNextUpstream = "http_403"
+	Http404       ProxyNextUpstream = "http_404"
+	Http429       ProxyNextUpstream = "http_429"
+	Http500       ProxyNextUpstream = "http_500"
+	Http502       ProxyNextUpstream = "http_502"
+	Http503       ProxyNextUpstream = "http_503"
+	Http504       ProxyNextUpstream = "http_504"
+	InvalidHeader ProxyNextUpstream = "invalid_header"
+	NonIdempotent ProxyNextUpstream = "non_idempotent"
+	Off           ProxyNextUpstream = "off"
+	ReadError     ProxyNextUpstream = "read_error"
+	Timeout       ProxyNextUpstream = "timeout"
+	Updating      ProxyNextUpstream = "updating"
 )
 
 // Defines values for AccessProtectionType.
@@ -42,14 +67,6 @@ const (
 	AccessTypeFullAccess AccessType = "full_access"
 	AccessTypeNone       AccessType = "none"
 	AccessTypeRead       AccessType = "read"
-)
-
-// Defines values for AclType.
-const (
-	AuthenticatedRead AclType = "authenticated-read"
-	Private           AclType = "private"
-	PublicRead        AclType = "public-read"
-	PublicReadWrite   AclType = "public-read-write"
 )
 
 // Defines values for ConnectionType.
@@ -123,6 +140,14 @@ const (
 	MaxAge404N60   MaxAge404 = 60
 )
 
+// Defines values for Operator.
+const (
+	AND  Operator = "AND"
+	NAND Operator = "NAND"
+	NOR  Operator = "NOR"
+	OR   Operator = "OR"
+)
+
 // Defines values for OriginScheme.
 const (
 	Http  OriginScheme = "http"
@@ -151,17 +176,20 @@ const (
 	SNI        SslType = "SNI"
 )
 
+// Balancer Selected method for IP Selection if not set defaults to `chash`
+type Balancer string
+
 // LocationType Data center location type: "full" for Super PoPs, "cache" for Embedded PoPs.
 type LocationType string
+
+// ProxyNextUpstream defines model for ProxyNextUpstream.
+type ProxyNextUpstream string
 
 // AccessProtectionType With "type": "blocklist" all values set are not allowed. With "type": "passlist" only values set are allowed.
 type AccessProtectionType string
 
 // AccessType defines model for accessType.
 type AccessType string
-
-// AclType defines model for aclType.
-type AclType string
 
 // Cache Your files will remain cached for the specified duration, after which your origin will be checked for an updated version of your files. Expiry/cache-control headers override this setting.
 type Cache struct {
@@ -180,7 +208,7 @@ type Cdn struct {
 	// Cache Your files will remain cached for the specified duration, after which your origin will be checked for an updated version of your files. Expiry/cache-control headers override this setting.
 	Cache *Cache `json:"cache,omitempty"`
 
-	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10".To add more, contact our support.
+	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
 	Cnames              Cnames               `json:"cnames"`
 	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
 
@@ -214,13 +242,17 @@ type Cdn struct {
 	OriginHeaders *OriginHeaders            `json:"origin_headers,omitempty"`
 
 	// OriginId ID of attached Origin (content source for CDN Resource). More information in our <a href="/support/api-docs/v3/origin">Origin</a> API documentation.
-	OriginId nullable.Nullable[string] `json:"origin_id,omitempty"`
+	OriginId        nullable.Nullable[string] `json:"origin_id,omitempty"`
+	OriginReference *OriginReference          `json:"origin_reference,omitempty"`
 
 	// QueryString Enabling this feature will ignore the query string, allowing URLs with <a href="https://en.wikipedia.org/wiki/Query_string">query strings</a> to cache properly. This is particularly useful if you tag your URLs with tracking/marketing parameters, for example.
 	QueryString *QueryString `json:"query_string,omitempty"`
 
-	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs"  URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
+	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs" URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
 	RateLimit *RateLimit `json:"rate_limit,omitempty"`
+
+	// ResponseHeaders Custom HTTP headers included in response sent to the client.
+	ResponseHeaders *ResponseHeaders `json:"response_headers,omitempty"`
 
 	// SecureToken This feature allows you to serve your content using signed URLs. You can enable your users to download secured content from the CDN Resource with a valid hash. Note: When you check this option, make sure to generate secured links to access your content. Maximum length is 64 characters.
 	SecureToken *SecureToken `json:"secure_token,omitempty"`
@@ -242,7 +274,7 @@ type CdnSsl struct {
 
 // CdnSummary defines model for cdnSummary.
 type CdnSummary struct {
-	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10".To add more, contact our support.
+	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
 	Cnames Cnames `json:"cnames"`
 
 	// CreationTime Timestamp when CDN Resource was created.
@@ -261,7 +293,8 @@ type CdnSummary struct {
 	Note nullable.Nullable[string] `json:"note,omitempty"`
 
 	// OriginId ID of attached Origin (content source for CDN Resource). More information in our <a href="/support/api-docs/v3/origin">Origin</a> API documentation.
-	OriginId nullable.Nullable[string] `json:"origin_id"`
+	OriginId        nullable.Nullable[string] `json:"origin_id"`
+	OriginReference *OriginReference          `json:"origin_reference,omitempty"`
 
 	// Url URL of the CDN Resource. Automatically generated when the CDN Resource is created. The number is the same as the CDN Resource ID.
 	Url string `json:"url"`
@@ -276,7 +309,7 @@ type Cname struct {
 	Id string `json:"id"`
 }
 
-// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10".To add more, contact our support.
+// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
 type Cnames = []Cname
 
 // ConditionalFeatureConfiguration defines model for conditionalFeatureConfiguration.
@@ -340,6 +373,27 @@ type EditSsl struct {
 type Errors struct {
 	Errors []string `json:"errors"`
 	Type   *string  `json:"type,omitempty"`
+}
+
+// FallbackOriginReference defines model for fallbackOriginReference.
+type FallbackOriginReference struct {
+	Id *struct {
+		Id *string `json:"id,omitempty"`
+	} `json:"id,omitempty"`
+
+	// Label Label of the fallback origin
+	Label *string             `json:"label,omitempty"`
+	Usage *ObjectStorageUsage `json:"usage,omitempty"`
+}
+
+// FallbackPolicy defines model for fallbackPolicy.
+type FallbackPolicy struct {
+	// Balancer Selected method for IP Selection if not set defaults to `chash`
+	Balancer       *Balancer            `json:"balancer,omitempty"`
+	FailTimeout    *int                 `json:"fail_timeout,omitempty"`
+	MaxFailTimeout *int                 `json:"max_fail_timeout,omitempty"`
+	MaxFails       *int                 `json:"max_fails,omitempty"`
+	NextUpstream   *[]ProxyNextUpstream `json:"next_upstream,omitempty"`
 }
 
 // FieldErrors defines model for fieldErrors.
@@ -446,8 +500,10 @@ type ObjectStorageOriginDetail struct {
 	BucketName string `json:"bucket_name"`
 
 	// Cdns List of all CDN Resources assigned to the Origin.
-	Cdns      []OriginCdn `json:"cdns"`
-	CreatedAt time.Time   `json:"created_at"`
+	Cdns            []OriginCdn                `json:"cdns"`
+	CreatedAt       time.Time                  `json:"created_at"`
+	FallbackOrigins *[]FallbackOriginReference `json:"fallback_origins,omitempty"`
+	FallbackPolicy  *FallbackPolicy            `json:"fallback_policy,omitempty"`
 
 	// Host Origin host without scheme and port.
 	Host string `json:"host"`
@@ -481,10 +537,15 @@ type ObjectStorageUsage struct {
 type Operand map[string][]string
 
 // Operands defines model for operands.
-type Operands struct {
-	AdditionalProperties map[string]interface{} `json:"-"`
-	union                json.RawMessage
+type Operands = []Operands_Item
+
+// Operands_Item defines model for operands.Item.
+type Operands_Item struct {
+	union json.RawMessage
 }
+
+// Operator defines model for operator.
+type Operator string
 
 // OriginCdn defines model for originCdn.
 type OriginCdn struct {
@@ -509,6 +570,19 @@ type OriginList_Item struct {
 	union json.RawMessage
 }
 
+// OriginReference defines model for originReference.
+type OriginReference struct {
+	Fallbacks *[]struct {
+		// Id Origin ID.
+		Id    *string `json:"id,omitempty"`
+		Label *string `json:"label,omitempty"`
+	} `json:"fallbacks,omitempty"`
+
+	// Id Origin ID.
+	Id    *string `json:"id,omitempty"`
+	Label *string `json:"label,omitempty"`
+}
+
 // OriginScheme defines model for originScheme.
 type OriginScheme string
 
@@ -523,9 +597,24 @@ type QueryString struct {
 // QueryStringIgnoreType defines model for queryStringIgnoreType.
 type QueryStringIgnoreType string
 
-// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs"  URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
+// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs" URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
 type RateLimit struct {
 	Enabled bool `json:"enabled"`
+}
+
+// ResponseHeader defines model for responseHeader.
+type ResponseHeader struct {
+	// Name Custom HTTP header name.
+	Name string `json:"name"`
+
+	// Value Custom HTTP header value.
+	Value string `json:"value"`
+}
+
+// ResponseHeaders Custom HTTP headers included in response sent to the client.
+type ResponseHeaders struct {
+	// Headers Custom HTTP headers included in response sent to client. Pass an empty array to remove all custom response headers.
+	Headers []ResponseHeader `json:"headers"`
 }
 
 // S3OriginDetail S3 Origin detail
@@ -540,7 +629,10 @@ type S3OriginDetail struct {
 	BaseDir nullable.Nullable[string] `json:"base_dir,omitempty"`
 
 	// Cdns List of all CDN Resources assigned to the Origin.
-	Cdns []OriginCdn `json:"cdns"`
+	Cdns            []OriginCdn `json:"cdns"`
+	FallbackOrigins []struct {
+		Id *string `json:"id,omitempty"`
+	} `json:"fallback_origins"`
 
 	// Host AWS Origin host without scheme and port. Can be a domain name or an IP address.
 	Host string `json:"host"`
@@ -659,7 +751,11 @@ type UrlOriginDetail struct {
 	BaseDir nullable.Nullable[string] `json:"base_dir,omitempty"`
 
 	// Cdns List of all CDN Resources assigned to the Origin.
-	Cdns []OriginCdn `json:"cdns"`
+	Cdns            []OriginCdn `json:"cdns"`
+	FallbackOrigins []struct {
+		Id *string `json:"id,omitempty"`
+	} `json:"fallback_origins"`
+	FallbackPolicy *FallbackPolicy `json:"fallback_policy,omitempty"`
 
 	// Host Origin URL host without scheme and port. Can be a domain name or an IP address.
 	Host string `json:"host"`
@@ -694,7 +790,7 @@ type CdnAddJSONBody struct {
 	// Cache Your files will remain cached for the specified duration, after which your origin will be checked for an updated version of your files. Expiry/cache-control headers override this setting.
 	Cache *Cache `json:"cache,omitempty"`
 
-	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate.Maximum number of CNAMEs is "10". To add more, contact our support.
+	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
 	Cnames              *[]string            `json:"cnames,omitempty"`
 	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
 
@@ -727,8 +823,11 @@ type CdnAddJSONBody struct {
 	// QueryString Enabling this feature will ignore the query string, allowing URLs with <a href="https://en.wikipedia.org/wiki/Query_string">query strings</a> to cache properly. This is particularly useful if you tag your URLs with tracking/marketing parameters, for example.
 	QueryString *QueryString `json:"query_string,omitempty"`
 
-	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs"  URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
+	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs" URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
 	RateLimit *RateLimit `json:"rate_limit,omitempty"`
+
+	// ResponseHeaders Custom HTTP headers included in response sent to the client.
+	ResponseHeaders *ResponseHeaders `json:"response_headers,omitempty"`
 
 	// SecureToken This feature allows you to serve your content using signed URLs. You can enable your users to download secured content from the CDN Resource with a valid hash. Note: When you check this option, make sure to generate secured links to access your content. Maximum length is 64 characters.
 	SecureToken *SecureToken `json:"secure_token,omitempty"`
@@ -740,7 +839,7 @@ type CdnEditJSONBody struct {
 	// Cache Your files will remain cached for the specified duration, after which your origin will be checked for an updated version of your files. Expiry/cache-control headers override this setting.
 	Cache *Cache `json:"cache,omitempty"`
 
-	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate.Maximum number of CNAMEs is "10". To add more, contact our support.
+	// Cnames All CNAMEs should be mapped via DNS to CDN URL. Otherwise it's not possible to generate SSL certificate. Maximum number of CNAMEs is "10". To add more, contact our support.
 	Cnames              *[]string            `json:"cnames,omitempty"`
 	ConditionalFeatures *ConditionalFeatures `json:"conditional_features,omitempty"`
 
@@ -773,8 +872,11 @@ type CdnEditJSONBody struct {
 	// QueryString Enabling this feature will ignore the query string, allowing URLs with <a href="https://en.wikipedia.org/wiki/Query_string">query strings</a> to cache properly. This is particularly useful if you tag your URLs with tracking/marketing parameters, for example.
 	QueryString *QueryString `json:"query_string,omitempty"`
 
-	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs"  URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
+	// RateLimit When enabled, this feature limits the data transfer rate by setting "limit_rate" based on the "rs" URL parameter and "limit_rate_after" by the value from the "ri" URL parameter.
 	RateLimit *RateLimit `json:"rate_limit,omitempty"`
+
+	// ResponseHeaders Custom HTTP headers included in response sent to the client.
+	ResponseHeaders *ResponseHeaders `json:"response_headers,omitempty"`
 
 	// SecureToken This feature allows you to serve your content using signed URLs. You can enable your users to download secured content from the CDN Resource with a valid hash. Note: When you check this option, make sure to generate secured links to access your content. Maximum length is 64 characters.
 	SecureToken *SecureToken `json:"secure_token,omitempty"`
@@ -824,8 +926,15 @@ type OriginEditAwsJSONBody struct {
 	AwsAccessKeySecret nullable.Nullable[string] `json:"aws_access_key_secret,omitempty"`
 	AwsRegion          nullable.Nullable[string] `json:"aws_region,omitempty"`
 	BaseDir            nullable.Nullable[string] `json:"base_dir,omitempty"`
-	Host               *string                   `json:"host,omitempty"`
-	Label              *string                   `json:"label,omitempty"`
+	FallbackOrigins    *[]struct {
+		// OriginId Fallback Origin ID
+		OriginId string `json:"origin_id"`
+
+		// Priority Priority
+		Priority *int `json:"priority,omitempty"`
+	} `json:"fallback_origins,omitempty"`
+	Host  *string `json:"host,omitempty"`
+	Label *string `json:"label,omitempty"`
 
 	// Note Optional note for the Origin.
 	Note   nullable.Nullable[string] `json:"note,omitempty"`
@@ -835,8 +944,6 @@ type OriginEditAwsJSONBody struct {
 
 // OriginCreateObjectStorageJSONBody defines parameters for OriginCreateObjectStorage.
 type OriginCreateObjectStorageJSONBody struct {
-	Acl AclType `json:"acl"`
-
 	// BucketName Bucket name must be a unique label within the selected cluster.
 	BucketName string `json:"bucket_name"`
 
@@ -882,9 +989,16 @@ type OriginCreateUrlJSONBody struct {
 
 // OriginEditUrlJSONBody defines parameters for OriginEditUrl.
 type OriginEditUrlJSONBody struct {
-	BaseDir nullable.Nullable[string] `json:"base_dir,omitempty"`
-	Host    *string                   `json:"host,omitempty"`
-	Label   *string                   `json:"label,omitempty"`
+	BaseDir         nullable.Nullable[string] `json:"base_dir,omitempty"`
+	FallbackOrigins *[]struct {
+		// OriginId Fallback Origin ID
+		OriginId string `json:"origin_id"`
+
+		// Priority Priority
+		Priority *int `json:"priority,omitempty"`
+	} `json:"fallback_origins,omitempty"`
+	Host  *string `json:"host,omitempty"`
+	Label *string `json:"label,omitempty"`
 
 	// Note Optional note for the Origin.
 	Note   nullable.Nullable[string] `json:"note,omitempty"`
@@ -928,21 +1042,30 @@ type SslSniAddJSONRequestBody = NewSsl
 // SslSniEditJSONRequestBody defines body for SslSniEdit for application/json ContentType.
 type SslSniEditJSONRequestBody = EditSsl
 
-// Getter for additional properties for Operands. Returns the specified
-// element and whether it was found
-func (a Operands) Get(fieldName string) (value interface{}, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
+// AsOperator returns the union data inside the Conditions_Item as a Operator
+func (t Conditions_Item) AsOperator() (Operator, error) {
+	var body Operator
+	err := json.Unmarshal(t.union, &body)
+	return body, err
 }
 
-// Setter for additional properties for Operands
-func (a *Operands) Set(fieldName string, value interface{}) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]interface{})
+// FromOperator overwrites any union data inside the Conditions_Item as the provided Operator
+func (t *Conditions_Item) FromOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOperator performs a merge with any union data inside the Conditions_Item, using the provided Operator
+func (t *Conditions_Item) MergeOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
 	}
-	a.AdditionalProperties[fieldName] = value
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
 }
 
 // AsOperand returns the union data inside the Conditions_Item as a Operand
@@ -1007,22 +1130,48 @@ func (t *Conditions_Item) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// AsOperand returns the union data inside the Operands as a Operand
-func (t Operands) AsOperand() (Operand, error) {
+// AsOperator returns the union data inside the Operands_Item as a Operator
+func (t Operands_Item) AsOperator() (Operator, error) {
+	var body Operator
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOperator overwrites any union data inside the Operands_Item as the provided Operator
+func (t *Operands_Item) FromOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOperator performs a merge with any union data inside the Operands_Item, using the provided Operator
+func (t *Operands_Item) MergeOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOperand returns the union data inside the Operands_Item as a Operand
+func (t Operands_Item) AsOperand() (Operand, error) {
 	var body Operand
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOperand overwrites any union data inside the Operands as the provided Operand
-func (t *Operands) FromOperand(v Operand) error {
+// FromOperand overwrites any union data inside the Operands_Item as the provided Operand
+func (t *Operands_Item) FromOperand(v Operand) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOperand performs a merge with any union data inside the Operands, using the provided Operand
-func (t *Operands) MergeOperand(v Operand) error {
+// MergeOperand performs a merge with any union data inside the Operands_Item, using the provided Operand
+func (t *Operands_Item) MergeOperand(v Operand) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -1033,22 +1182,22 @@ func (t *Operands) MergeOperand(v Operand) error {
 	return err
 }
 
-// AsOperands returns the union data inside the Operands as a Operands
-func (t Operands) AsOperands() (Operands, error) {
+// AsOperands returns the union data inside the Operands_Item as a Operands
+func (t Operands_Item) AsOperands() (Operands, error) {
 	var body Operands
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOperands overwrites any union data inside the Operands as the provided Operands
-func (t *Operands) FromOperands(v Operands) error {
+// FromOperands overwrites any union data inside the Operands_Item as the provided Operands
+func (t *Operands_Item) FromOperands(v Operands) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOperands performs a merge with any union data inside the Operands, using the provided Operands
-func (t *Operands) MergeOperands(v Operands) error {
+// MergeOperands performs a merge with any union data inside the Operands_Item, using the provided Operands
+func (t *Operands_Item) MergeOperands(v Operands) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -1056,6 +1205,16 @@ func (t *Operands) MergeOperands(v Operands) error {
 
 	merged, err := runtime.JSONMerge(t.union, b)
 	t.union = merged
+	return err
+}
+
+func (t Operands_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *Operands_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
@@ -1206,56 +1365,6 @@ func (t OriginList_Item) MarshalJSON() ([]byte, error) {
 func (t *OriginList_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
-}
-
-// Override default JSON handling for Operands to handle AdditionalProperties and union
-func (a *Operands) UnmarshalJSON(b []byte) error {
-	err := a.union.UnmarshalJSON(b)
-	if err != nil {
-		return err
-	}
-	object := make(map[string]json.RawMessage)
-	err = json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]interface{})
-		for fieldName, fieldBuf := range object {
-			var fieldVal interface{}
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for Operands to handle AdditionalProperties and union
-func (a Operands) MarshalJSON() ([]byte, error) {
-	var err error
-	b, err := a.union.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	object := make(map[string]json.RawMessage)
-	if a.union != nil {
-		err = json.Unmarshal(b, &object)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
-		}
-	}
-	return json.Marshal(object)
 }
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -3252,7 +3361,7 @@ func (r CdnListResponse) Bytes() []byte {
 type CdnAddResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *CdnSummary
+	JSON201      *Cdn
 	JSON422      *FieldErrors
 	JSONDefault  *Errors
 }
@@ -4519,7 +4628,7 @@ func ParseCdnAddResponse(rsp *http.Response) (*CdnAddResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest CdnSummary
+		var dest Cdn
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
