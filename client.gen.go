@@ -336,7 +336,10 @@ type ConditionalFeatures struct {
 }
 
 // Conditions defines model for conditions.
-type Conditions struct {
+type Conditions = []Conditions_Item
+
+// Conditions_Item defines model for conditions.Item.
+type Conditions_Item struct {
 	union json.RawMessage
 }
 
@@ -1039,22 +1042,48 @@ type SslSniAddJSONRequestBody = NewSsl
 // SslSniEditJSONRequestBody defines body for SslSniEdit for application/json ContentType.
 type SslSniEditJSONRequestBody = EditSsl
 
-// AsOperand returns the union data inside the Conditions as a Operand
-func (t Conditions) AsOperand() (Operand, error) {
+// AsOperator returns the union data inside the Conditions_Item as a Operator
+func (t Conditions_Item) AsOperator() (Operator, error) {
+	var body Operator
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOperator overwrites any union data inside the Conditions_Item as the provided Operator
+func (t *Conditions_Item) FromOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOperator performs a merge with any union data inside the Conditions_Item, using the provided Operator
+func (t *Conditions_Item) MergeOperator(v Operator) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOperand returns the union data inside the Conditions_Item as a Operand
+func (t Conditions_Item) AsOperand() (Operand, error) {
 	var body Operand
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOperand overwrites any union data inside the Conditions as the provided Operand
-func (t *Conditions) FromOperand(v Operand) error {
+// FromOperand overwrites any union data inside the Conditions_Item as the provided Operand
+func (t *Conditions_Item) FromOperand(v Operand) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOperand performs a merge with any union data inside the Conditions, using the provided Operand
-func (t *Conditions) MergeOperand(v Operand) error {
+// MergeOperand performs a merge with any union data inside the Conditions_Item, using the provided Operand
+func (t *Conditions_Item) MergeOperand(v Operand) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -1065,22 +1094,22 @@ func (t *Conditions) MergeOperand(v Operand) error {
 	return err
 }
 
-// AsOperands returns the union data inside the Conditions as a Operands
-func (t Conditions) AsOperands() (Operands, error) {
+// AsOperands returns the union data inside the Conditions_Item as a Operands
+func (t Conditions_Item) AsOperands() (Operands, error) {
 	var body Operands
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOperands overwrites any union data inside the Conditions as the provided Operands
-func (t *Conditions) FromOperands(v Operands) error {
+// FromOperands overwrites any union data inside the Conditions_Item as the provided Operands
+func (t *Conditions_Item) FromOperands(v Operands) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOperands performs a merge with any union data inside the Conditions, using the provided Operands
-func (t *Conditions) MergeOperands(v Operands) error {
+// MergeOperands performs a merge with any union data inside the Conditions_Item, using the provided Operands
+func (t *Conditions_Item) MergeOperands(v Operands) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -1091,12 +1120,12 @@ func (t *Conditions) MergeOperands(v Operands) error {
 	return err
 }
 
-func (t Conditions) MarshalJSON() ([]byte, error) {
+func (t Conditions_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *Conditions) UnmarshalJSON(b []byte) error {
+func (t *Conditions_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
